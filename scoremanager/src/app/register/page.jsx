@@ -11,6 +11,7 @@ export default function RegisterPage() {
     username: '',
     email: '',
     password: '',
+    role: 'player', // Default role
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
@@ -66,6 +67,7 @@ export default function RegisterPage() {
       username: formData.username,
       email: formData.email,
       password: formData.password,
+      role: formData.role, // Include selected role
     };
 
     const updatedUsers = [...users, newUser];
@@ -137,6 +139,19 @@ export default function RegisterPage() {
                     onChange={handleChange}
                     required
                   />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="formRole">
+                  <Form.Label>Rol</Form.Label>
+                  <Form.Select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="player">Jugador</option>
+                    <option value="administrator">Administrador</option>
+                  </Form.Select>
                 </Form.Group>
 
                 <div className="d-flex justify-content-between">

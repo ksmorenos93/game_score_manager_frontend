@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import withAuth from "scoremanager/hoc/with-auth";
 import NavbarHome from "scoremanager/components/shared/navbar-home/page"; // Import the NavbarHome component
 
-function UserProfile({ params }) {
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState('');
+function UserScore({ params }) {
+  const [userScore, setUserScore] = useState(null); // State to store userScore
+  const [error, setError] = useState(''); // State for error handling
   const router = useRouter();
 
   useEffect(() => {
@@ -18,7 +18,7 @@ function UserProfile({ params }) {
     const foundUser = users.find(u => u.id === parseInt(userId)); // Assuming user.id is a number
 
     if (foundUser) {
-      setUser(foundUser);
+      setUserScore(foundUser.score); // Set the score instead of user details
     } else {
       setError('User not found');
       router.push('/login'); // Redirect if user is not found
@@ -37,18 +37,12 @@ function UserProfile({ params }) {
         <Row>
           <Col md={6} className="mx-auto">
             {error && <Alert variant="danger">{error}</Alert>}
-            {user ? (
+            {userScore !== null ? (
               <Card>
                 <Card.Body>
-                  <Card.Title>Perfil de Usuario</Card.Title>
+                  <Card.Title>Puntuación del Usuario</Card.Title> {/* Title for user score */}
                   <Card.Text>
-                    <strong>Nombre de usuario:</strong> {user.username}
-                  </Card.Text>
-                  <Card.Text>
-                    <strong>Correo electrónico:</strong> {user.email}
-                  </Card.Text>
-                  <Card.Text>
-                    <strong>Rol:</strong> {user.role}
+                    <strong>Puntuación:</strong> {userScore} {/* Display the user's score */}
                   </Card.Text>
                   <Button variant="danger" onClick={handleLogout}>
                     Cerrar sesión
@@ -56,7 +50,7 @@ function UserProfile({ params }) {
                 </Card.Body>
               </Card>
             ) : (
-              <p>Cargando perfil...</p>
+              <p>Cargando puntuación...</p>
             )}
           </Col>
         </Row>
@@ -65,4 +59,4 @@ function UserProfile({ params }) {
   );
 }
 
-export default withAuth(UserProfile);
+export default withAuth(UserScore);

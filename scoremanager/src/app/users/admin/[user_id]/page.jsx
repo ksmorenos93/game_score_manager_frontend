@@ -6,12 +6,29 @@ import { useRouter } from "next/navigation";
 import withAuth from "scoremanager/hoc/with-auth";
 import NavbarHome from "scoremanager/components/shared/navbar-home/page"; // Import the NavbarHome component
 
-function UserProfile({ params }) {
+function UserAdminProfile({ params }) {
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      router.push('/login'); // Redirect to login if no token is found
+      return;
+    }
+
+    const decodedToken = JSON.parse(atob(token));
+    const role = decodedToken.role;
+
+    // Check if the user has the 'administrator' role
+    if (role !== 'administrator') {
+      const userId = params.user_id; // Get user_id from route parameters
+      router.push(`/users/profile/${userId}`); // Redirect to user profile if not an admin
+      return;
+    }
+
+    // Proceed to get user data if user is an admin
     const users = JSON.parse(localStorage.getItem('users')) || [];
     const userId = params.user_id; // Get user_id from route parameters
 
@@ -40,7 +57,7 @@ function UserProfile({ params }) {
             {user ? (
               <Card>
                 <Card.Body>
-                  <Card.Title>Perfil de Usuario</Card.Title>
+                  <Card.Title>Perfil de Administrador</Card.Title>
                   <Card.Text>
                     <strong>Nombre de usuario:</strong> {user.username}
                   </Card.Text>
@@ -65,4 +82,4 @@ function UserProfile({ params }) {
   );
 }
 
-export default withAuth(UserProfile);
+export default withAuth(UserAdminProfile);

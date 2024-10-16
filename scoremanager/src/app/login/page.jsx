@@ -21,6 +21,7 @@ const LoginPage = () => {
         id: user.id,
         email: user.email,
         username: user.username,
+        role: user.role, // Add the user's role to the token
         exp: new Date().getTime() + 3600000 // 1 hour from now
       }));
       
@@ -29,6 +30,11 @@ const LoginPage = () => {
     } else {
       setError('Credenciales incorrectas');
     }
+  };
+
+  // Handle redirect to the register page
+  const handleRegisterRedirect = () => {
+    router.push('/register');
   };
 
   return (
@@ -62,7 +68,12 @@ const LoginPage = () => {
                     required
                   />
                 </Form.Group>
-                <Button variant="primary" type="submit">Iniciar Sesión</Button>
+                <div className="d-flex justify-content-between">
+                  <Button variant="primary" type="submit">Iniciar Sesión</Button>
+                  <Button variant="secondary" onClick={handleRegisterRedirect}>
+                    Registrarse
+                  </Button>
+                </div>
               </Form>
             </Card.Body>
           </Card>
