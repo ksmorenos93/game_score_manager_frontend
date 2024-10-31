@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
+    "baseUrl": ".", // Ensures paths are relative to the project root
     "paths": {
-      "scoremanager/*": ["./src/*"]
+      "scoremanager/*": ["src/*"] // Maps "scoremanager/" to "src/"
     }
   }
 }

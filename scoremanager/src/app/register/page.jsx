@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Form, Button, Container, Row, Col, Alert, Card } from 'react-bootstrap';
+import {useCreateRegistrationMutation} from "scoremanager/store/services/scores.api"
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -13,6 +14,9 @@ export default function RegisterPage() {
     password: '',
     role: 'player', // Default role
   });
+
+  const [createRegistration, {isUpdating}] = useCreateRegistrationMutation();
+
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState('');
@@ -61,6 +65,8 @@ export default function RegisterPage() {
       return;
     }
 
+   
+
     // Save new user to localStorage with a consecutive ID
     const newUser = {
       id: users.length + 1, // Consecutive ID
@@ -70,12 +76,21 @@ export default function RegisterPage() {
       role: formData.role, // Include selected role
     };
 
-    const updatedUsers = [...users, newUser];
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    createRegistration({...newUser})
+    .unwrap()
+    .then(data => {
+      const updatedUsers = [...users, newUser];
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
+      setShowSuccess(true);})
+    .catch(err => {
+      setShowError('Error ');
+    });
+
+    
 
     // Show success message
-    setShowSuccess(true);
-    setShowError('');
+   
+    
   };
 
   // Redirect to the login page
