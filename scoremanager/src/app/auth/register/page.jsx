@@ -95,7 +95,7 @@ export default function RegisterPage() {
 
   // Redirect to the login page
   const handleLoginRedirect = () => {
-    router.push('/login'); // Redirect to the /login route
+    router.push('/auth/login'); // Redirect to the /login route
   };
 
   return (

@@ -7,17 +7,31 @@ export const scoresApi = createApi({
   }),
   endpoints: (builder) => ({
     getProfiles: builder.query({
-      query: (id) => `users/profile/{}`
+      query: (userId) => `users/profile/${userId}`,
     }),
+
     createRegistration: builder.mutation({
-      query: (body) => ({
-          url: "/register",
-          method: "POST",
-          body,
-      }
-      )
-    })
-  })
+      query: (formDataNewUser) => ({
+        url: "auth/register",
+        method: "POST",
+        body: formDataNewUser
+      }),
+    }),
+
+    // New login endpoint
+    userLogin: builder.mutation({
+      query: (credentials) => ({
+        url: "auth/login",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+  }),
 });
 
-export const {useGetProfilesQuery, useCreateRegistrationMutation} = scoresApi;
+// Export hooks for usage in functional components
+export const { 
+  useGetProfilesQuery, 
+  useCreateRegistrationMutation, 
+  useUserLoginMutation // Export the login hook
+} = scoresApi;

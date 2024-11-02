@@ -5,15 +5,20 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import withAuth from "scoremanager/hoc/with-auth";
 import NavbarHome from "scoremanager/components/shared/navbar-home/page"; // Import the NavbarHome component
+import { useGetProfilesQuery } from "scoremanager/store/services/scores.api";
 
 function UserProfile({ params }) {
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
   const router = useRouter();
 
+  // Fetch data from the API using the query hook
+  const { data: apiUser, error: apiError, isLoading } = useGetProfilesQuery(params.user_id);
+
   useEffect(() => {
+    // Fetch user data from localStorage
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const userId = params.user_id; // Get user_id from route parameters
+    const userId = params.user_id;
 
     const foundUser = users.find(u => u.id === parseInt(userId)); // Assuming user.id is a number
 
@@ -21,13 +26,18 @@ function UserProfile({ params }) {
       setUser(foundUser);
     } else {
       setError('User not found');
-      router.push('/login'); // Redirect if user is not found
+      router.push('/auth/login'); // Redirect if user is not found
     }
-  }, [params.user_id, router]);
+
+    // Redirect to login if API returns an error
+    if (apiError) {
+      router.push("/auth/login");
+    }
+  }, [params.user_id, router, apiError]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('token'); // Clear the token from sessionStorage
-    router.push('/login'); // Redirect to the login page
+    sessionStorage.removeItem("token"); // Clear the token from sessionStorage
+    router.push("/auth/login"); // Redirect to the login page
   };
 
   return (
@@ -58,6 +68,22 @@ function UserProfile({ params }) {
             ) : (
               <p>Cargando perfil...</p>
             )}
+
+            {/* API Response Section */}
+            <div className="mt-4">
+              <h5>API Response</h5>
+              <Card>
+                <Card.Body>
+                  {isLoading ? (
+                    <p>Cargando datos del API...</p>
+                  ) : (
+                    <Card.Text>
+                      <strong>API Response:</strong> {apiUser?.username || "No disponible"}
+                    </Card.Text>
+                  )}
+                </Card.Body>
+              </Card>
+            </div>
           </Col>
         </Row>
       </Container>
