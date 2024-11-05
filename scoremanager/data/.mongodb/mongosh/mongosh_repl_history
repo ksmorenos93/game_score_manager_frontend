@@ -1,0 +1,12 @@
+db.users.find().count()
+db.users.find()
+show collections
+use scoremanager
+show dbs
+db.users.find().value_count()
+db.users.find().count_values()
+db.users.find().count()
+db.users.find()
+history
+use scoremanager
+show dbs
