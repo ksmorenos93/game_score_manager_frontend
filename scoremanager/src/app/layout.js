@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import StoreProvider from "scoremanager/store/provider";
+import StoreProvider from "../store/provider"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

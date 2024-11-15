@@ -1,6 +1,7 @@
 "use client"
 
-import Footer from "scoremanager/components/shared/footer/page"
+import Footer from "../../components/shared/footer/page"
+
 export default function Layout({ children }) {
     
     return (

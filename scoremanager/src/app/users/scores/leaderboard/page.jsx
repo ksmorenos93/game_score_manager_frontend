@@ -1,25 +1,54 @@
-"use client";
+"use client"
 
-import { Container, Row, Col, Card } from "react-bootstrap";
-import NavbarHome from "scoremanager/components/shared/navbar-home/page"; // Assuming NavbarHome is common for navigation
+import React from 'react';
+import { useGetLeaderboardQuery } from "scoremanager/store/services/scores.api"; 
+import { Table, Spinner, Alert } from 'react-bootstrap'; // Importing required components from react-bootstrap
 
-function Leaderboard() {
+const ScorePage = () => {
+  // Fetch leaderboard scores
+  const { data: leaderboard, error, isLoading } = useGetLeaderboardQuery();
+
+  // Show loading spinner, error message, or leaderboard table
+  if (isLoading) {
+    return (
+      <div className="text-center">
+        <Spinner animation="border" variant="primary" /> {/* Loading spinner */}
+        <p>Loading leaderboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center">
+        <Alert variant="danger">Error: {error.message}</Alert> {/* Error message */}
+      </div>
+    );
+  }
+
   return (
-    <>
-      <NavbarHome /> {/* Assuming NavbarHome doesn't need userId for this page */}
-      <Container className="mt-5">
-        <Row>
-          <Col md={6} className="mx-auto">
-            <Card>
-              <Card.Body>
-                <Card.Title>Leaderboard</Card.Title>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </>
+    <div>
+      <h1>Leaderboard</h1>
+      <Table striped bordered hover responsive>
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Game</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {leaderboard?.map((score) => (
+            <tr key={score.scoreId}>
+              <td>{score.userId}</td>
+              <td>{score.game}</td>
+              <td>{score.score}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
   );
-}
+};
 
-export default Leaderboard;
+export default ScorePage;

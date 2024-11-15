@@ -1,55 +1,32 @@
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
-export default function NavbarHome() {
+// Define the type for the props of NavbarHome
+interface NavbarHomeProps {
+  userId: string;
+}
+
+export default function NavbarHome({ userId }: NavbarHomeProps) {
   const router = useRouter();
-  const [userId, setUserId] = useState(null);
-
-  useEffect(() => {
-    // Retrieve and decode token from sessionStorage
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      const decodedToken = JSON.parse(atob(token)); // Decode the base64 token
-      setUserId(decodedToken.id); // Set userId from decoded token
-    }
-  }, []);
 
   const handleUserProfile = () => {
-    if (userId) {
-      router.push(`/users/profile/${userId}`);
-    } else {
-      router.push('/login');
-    }
+    router.push(`/users/profile/${userId}`); // Redirect to user profile page with userId
   };
 
   const handleScoreProfile = () => {
-    if (userId) {
-      router.push(`/users/scores/${userId}`); // Redirect to the user's score profile
-    } else {
-      router.push('/login');
-    }
+    router.push('/users/scores/leaderboard'); // Redirect to scores page
   };
 
   const handleAdminUserProfile = () => {
-    if (userId) {
-      router.push(`/users/admin/${userId}`); // Redirect to the admin user profile
-    } else {
-      router.push('/login');
-    }
+    router.push('/users/admin'); // Redirect to admin user profile page
   };
 
   const handleAdmin = () => {
-    if (userId) {
-      router.push(`/users/admin`); // Redirect to the admin user profile
-    } else {
-      router.push('/login');
-    }
+    router.push('/users/admin'); // Redirect to admin panel
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('token'); // Clear the session token
-    router.push('/login'); // Redirect to the login page
+    router.push('/auth/login'); // Redirect to login page (no token management)
   };
 
   return (
@@ -60,7 +37,7 @@ export default function NavbarHome() {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link href="/">Home</Nav.Link>
-            {/* Dynamically redirect to user profile */}
+            {/* Direct routing to user profile */}
             <Nav.Link onClick={handleUserProfile}>My Profile</Nav.Link>
             {/* Dropdown for scores */}
             <NavDropdown title="Scores" id="basic-nav-dropdown">
@@ -72,7 +49,7 @@ export default function NavbarHome() {
                 My Score Profile
               </NavDropdown.Item>
             </NavDropdown>
-            {/* New Dropdown for Admin options */}
+            {/* Dropdown for Admin options */}
             <NavDropdown title="Admin" id="admin-nav-dropdown">
               <NavDropdown.Item onClick={handleAdminUserProfile}>
                 Manage User Profile

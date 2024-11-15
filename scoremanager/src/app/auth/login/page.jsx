@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Form, Button, Alert, Container, Row, Col, Card } from 'react-bootstrap';
-import { useUserLoginMutation } from "scoremanager/store/services/scores.api";
+import { useUserLoginMutation } from  "../../../store/services/users.api"
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
