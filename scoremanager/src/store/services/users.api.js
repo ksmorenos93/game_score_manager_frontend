@@ -10,7 +10,9 @@ export const usersApi = createApi({
       query: (userId) => `users/${userId}`,
     }),
 
-
+    getUserScores: builder.query({
+      query: (userId) => `scores/leaderboard`,
+    }),
 
     createRegistration: builder.mutation({
       query: (formDataNewUser) => ({
