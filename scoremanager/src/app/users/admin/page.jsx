@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGetUsersQuery, useDeleteUserMutation, useChangeUserStatusMutation } from "../../../store/services/users.api";
 import NavbarHome from "../../../components/shared/navbar-home/page";
+import { Pencil, XCircle } from "react-bootstrap-icons"; // Import icons
 
 function AdminPage() {
   const [editingUserId, setEditingUserId] = useState(null);
@@ -31,7 +32,7 @@ function AdminPage() {
     const { name, value } = e.target;
     setUpdatedUserData((prev) => ({
       ...prev,
-      [name]: name === "roles" ? value.split(",").map((role) => role.trim()) : value,
+      [name]: name === "roles" ? value.split(",").map((role) => role.trim()) : value, // Convert roles to array
     }));
   };
 
@@ -39,15 +40,18 @@ function AdminPage() {
   const handleUpdateSubmit = (e) => {
     e.preventDefault();
     console.log("Update user data:", updatedUserData);
+    // TODO: Add PATCH API logic here
     setEditingUserId(null); // Exit edit mode
   };
 
   // Toggle user status
   const handleStatusToggle = async (userId, currentStatus) => {
     try {
-      await changeUserStatus(userId).unwrap();
+      await changeUserStatus(userId).unwrap(); // Unwraps the result or throws an error
       console.log("Status updated successfully");
-      refetch(); // Refetch users
+
+      // Optimistically update the status to avoid waiting for refetch
+      refetch(); // Refetch users after status update, this will re-render the table with the updated data
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -66,7 +70,9 @@ function AdminPage() {
     }
   };
 
+  // Ensure that users is an array before sorting
   const users = responseData?.users || [];
+
   const sortedUsers = Array.isArray(users) ? [...users].sort((a, b) => a.name.localeCompare(b.name)) : [];
 
   return (
@@ -82,8 +88,8 @@ function AdminPage() {
                 <p>Loading users...</p>
               </div>
             ) : (
-              <Table striped bordered hover>
-                <thead>
+              <Table striped bordered hover responsive className="custom-table">
+                <thead className="table-dark">
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
@@ -99,31 +105,94 @@ function AdminPage() {
                     <tr key={user.userId}>
                       <td>{user.userId}</td>
                       <td>
-                        <span
-                          style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-                          onClick={() => router.push(`/users/profile/${user.userId}`)}
-                        >
-                          {user.name}
-                        </span>
+                        {editingUserId === user.userId ? (
+                          <Form.Control
+                            type="text"
+                            name="name"
+                            value={updatedUserData.name || ""}
+                            onChange={handleUpdateChange}
+                          />
+                        ) : (
+                          <span
+                            style={{ cursor: "pointer", color: "#007bff", textDecoration: "underline" }}
+                            onClick={() => router.push(`/users/profile/${user.userId}`)}
+                          >
+                            {user.name}
+                          </span>
+                        )}
                       </td>
-                      <td>{user.email}</td>
-                      <td>{user.avatar || "No avatar"}</td>
                       <td>
-                        <Button
-                          variant={user.status === "BLOCKED" ? "danger" : "success"}
-                          onClick={() => handleStatusToggle(user.userId, user.status)}
-                        >
-                          {user.status === "BLOCKED" ? "BLOCKED" : "ACTIVATE"}
-                        </Button>
+                        {editingUserId === user.userId ? (
+                          <Form.Control
+                            type="email"
+                            name="email"
+                            value={updatedUserData.email || ""}
+                            onChange={handleUpdateChange}
+                          />
+                        ) : (
+                          user.email
+                        )}
                       </td>
-                      <td>{user.roles.join(", ")}</td>
                       <td>
-                        <Button variant="primary" onClick={() => handleEditClick(user)}>
-                          Edit
-                        </Button>
-                        <Button variant="danger" onClick={() => handleDeleteClick(user.userId)}>
-                          {isDeleting ? <Spinner animation="border" size="sm" /> : "Delete"}
-                        </Button>
+                        {editingUserId === user.userId ? (
+                          <Form.Control
+                            type="text"
+                            name="avatar"
+                            value={updatedUserData.avatar || ""}
+                            onChange={handleUpdateChange}
+                          />
+                        ) : (
+                          user.avatar || "No avatar"
+                        )}
+                      </td>
+                      <td>
+                        {editingUserId === user.userId ? (
+                          <Form.Control
+                            type="text"
+                            name="status"
+                            value={updatedUserData.status || ""}
+                            onChange={handleUpdateChange}
+                          />
+                        ) : (
+                          <Button
+                            variant={user.status === "BLOCKED" ? "danger" : "success"} // Button color based on status
+                            onClick={() => handleStatusToggle(user.userId, user.status)} // Trigger status change
+                          >
+                            {user.status === "BLOCKED" ? "BLOCKED" : "ACTIVATE"}  {/* Button text based on status */}
+                          </Button>
+                        )}
+                      </td>
+                      <td>
+                        {editingUserId === user.userId ? (
+                          <Form.Control
+                            type="text"
+                            name="roles"
+                            value={updatedUserData.roles?.join(", ") || ""}
+                            onChange={handleUpdateChange}
+                          />
+                        ) : (
+                          user.roles.join(", ")
+                        )}
+                      </td>
+                      <td>
+                        {editingUserId === user.userId ? (
+                          <Button variant="success" onClick={handleUpdateSubmit} className="me-2">
+                            Save
+                          </Button>
+                        ) : (
+                          <>
+                            <Button variant="warning" onClick={() => handleEditClick(user)} className="me-2">
+                              <Pencil /> {/* Pencil icon for Edit */}
+                            </Button>
+                            <Button
+                              variant="danger"
+                              onClick={() => handleDeleteClick(user.userId)}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? <Spinner animation="border" size="sm" /> : <XCircle />} {/* Red X icon for Delete */}
+                            </Button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
