@@ -14,7 +14,7 @@ export const store = configureStore({
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
-      .concat([usersApi.middleware, scoresApi.middleware]), // Add scoresApi.middleware
+      .concat([usersApi.middleware, scoresApi.middleware, authApi.middleware]), // Add scoresApi.middleware
 });
 
 setupListeners(store.dispatch);

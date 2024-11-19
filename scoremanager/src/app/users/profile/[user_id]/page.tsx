@@ -1,70 +1,57 @@
-"use client";
+'use client'; // Ensure this is a Client Component
 
-import { Container, Row, Col, Card, Alert, Button } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import withAuth from "../../../../hoc/with-auth";
-import NavbarHome from "../../../../components/shared/navbar-home/page";
-import { useGetProfilesQuery } from "../../../../store/services/users.api";
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation'; // Use useParams for route params and useRouter for navigation
+import { useGetProfilesQuery } from '../../../../store/services/users.api';
+import { Container, Row, Col, Card, Alert, Button } from 'react-bootstrap';
+import NavbarHome from '../../../../components/shared/navbar-home/page';
 
-// Define the type for the profile data structure.
-interface UserProfileData {
-  name: string;
-  email: string;
-  avatar: string | null;
-  status: string;
-  roles: string[];
-}
+function UserProfile() {
+  const params = useParams(); // Use useParams to get dynamic route params
+  const userId = Array.isArray(params?.user_id) ? params.user_id[0] : params.user_id; // Ensure userId is a string
+  const router = useRouter(); // Use useRouter for navigation
+  const [error, setError] = useState<string>('');
 
-// Define the type for the `params` prop
-interface UserProfileProps {
-  params: {
-    user_id: string;
-  };
-}
-
-function UserProfile({ params }: UserProfileProps) {
-  const [error, setError] = useState<string>(''); // Set type for error
-  const router = useRouter();
-
-  // Use the useGetProfilesQuery hook to fetch the user profile
-  const { data: user, error: apiError, isLoading } = useGetProfilesQuery(params.user_id);
+  // Fetch user data based on userId with polling enabled
+  const { data: user, error: apiError, isLoading } = useGetProfilesQuery(userId, {
+    skip: !userId, // Skip the query if userId is not available
+    pollingInterval: 1000, // Poll every 1 second
+  });
 
   useEffect(() => {
-    // Handle redirection or error when fetching data
     if (apiError) {
+      console.error(apiError); // Log the API error for debugging
       setError('Error fetching user data');
-      router.push("/auth/login");
     }
-  }, [apiError, router]);
+  }, [apiError]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("token"); // Clear the token from sessionStorage
-    router.push("/auth/login"); // Redirect to the login page
+    sessionStorage.removeItem('token');
+    router.push('/login'); // Redirect to login page
   };
 
   return (
     <>
-      <NavbarHome userId={params.user_id} /> {/* Pass userId as a prop */}
+      <NavbarHome userId={userId || ''} />
       <Container className="mt-5">
         <Row>
           <Col md={6} className="mx-auto">
             {error && <Alert variant="danger">{error}</Alert>}
             {isLoading ? (
-              <p>Cargando perfil...</p>
+              <p>Loading profile...</p>
             ) : (
-              user && (
+              user ? (
                 <Card>
                   <Card.Body>
-                    <Card.Title>Perfil de Usuario</Card.Title>
+                    <Card.Title>User Profile</Card.Title>
                     <Card.Text>
-                      <strong>Nombre de usuario:</strong> {user.name}
+                      <strong>Username:</strong> {user.name}
                     </Card.Text>
                     <Card.Text>
-                      <strong>Correo electrónico:</strong> {user.email}
+                      <strong>Email:</strong> {user.email}
                     </Card.Text>
                     <Card.Text>
-                      <strong>Avatar:</strong> {user.avatar || "No disponible"}
+                      <strong>Avatar:</strong> {user.avatar || 'Not available'}
                     </Card.Text>
                     <Card.Text>
                       <strong>Status:</strong> {user.status}
@@ -73,10 +60,12 @@ function UserProfile({ params }: UserProfileProps) {
                       <strong>Roles:</strong> {user.roles.join(', ')}
                     </Card.Text>
                     <Button variant="danger" onClick={handleLogout}>
-                      Cerrar sesión
+                      Logout
                     </Button>
                   </Card.Body>
                 </Card>
+              ) : (
+                <Alert variant="warning">User data not found</Alert>
               )
             )}
           </Col>

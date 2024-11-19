@@ -1,9 +1,8 @@
-'use client';
-
+"use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Form, Button, Alert, Container, Row, Col, Card } from 'react-bootstrap';
 import { useLoginMutation } from "../../../store/services/auth.api"; // Import from auth.api
+import { Form, Button, Alert, Container, Row, Col, Card } from 'react-bootstrap';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -22,22 +21,21 @@ const LoginPage = () => {
       // Call the API login function
       const { token } = await login({ email, password }).unwrap(); // Extract token from API response
 
-      // Decode the JWT token to get the user ID
-      const decodedToken = JSON.parse(atob(token.split('.')[1]));
-      const userId = decodedToken.sub; // Assuming `sub` is userId in the token payload
-
       // Save the token in sessionStorage
       sessionStorage.setItem('token', token);
 
-      // Redirect to the user profile
+      // Decode the token to extract the userId (Assuming JWT and it contains the userId as 'sub')
+      const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT to extract userId
+      const userId = decodedToken.user.sub; // Assuming 'sub' is the userId in your JWT
+
+      // Redirect to the user profile page with userId from the token
       router.push(`/users/profile/${userId}`);
     } catch (err: any) {
-      // Handle API or validation errors
-      setError(err?.data?.message || 'Error connecting to the server.');
+      setError(err?.data?.message || err?.message || 'Error connecting to the server.');
     }
   };
 
-  // Redirect to the register page
+  // Redirect to register page
   const handleRegisterRedirect = () => {
     router.push('/auth/register');
   };
@@ -78,11 +76,15 @@ const LoginPage = () => {
                   <Button variant="primary" type="submit" disabled={isLoading}>
                     {isLoading ? 'Cargando...' : 'Iniciar Sesión'}
                   </Button>
-                  <Button variant="secondary" onClick={handleRegisterRedirect}>
-                    Registrarse
-                  </Button>
                 </div>
               </Form>
+
+              {/* Add a button for redirecting to the registration page */}
+              <div className="mt-3 text-center">
+                <Button variant="link" onClick={handleRegisterRedirect}>
+                  ¿No tienes cuenta? Registrarse
+                </Button>
+              </div>
             </Card.Body>
           </Card>
         </Col>

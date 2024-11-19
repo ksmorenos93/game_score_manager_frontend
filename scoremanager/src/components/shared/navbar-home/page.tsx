@@ -1,32 +1,59 @@
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-// Define the type for the props of NavbarHome
 interface NavbarHomeProps {
-  userId: string;
+  userId: string; // Accept userId as a prop, but we'll get it from the token instead
 }
 
 export default function NavbarHome({ userId }: NavbarHomeProps) {
   const router = useRouter();
+  const [hasAdminRole, setHasAdminRole] = useState<boolean>(false);
+  const [userIdFromToken, setUserIdFromToken] = useState<string | null>(null); // Store the userId from the token
+
+  useEffect(() => {
+    try {
+      const token = sessionStorage.getItem("token");
+
+      if (token) {
+        const decodedToken = JSON.parse(atob(token.split(".")[1]));
+        const userRoles = decodedToken.user?.roles || [];
+        const userId = decodedToken.user?.sub || null; // Extract userId from token (assuming 'sub' is the userId)
+
+        setUserIdFromToken(userId); // Save the userId from token
+        setHasAdminRole(Array.isArray(userRoles) && userRoles.includes("ADMIN"));
+      } else {
+        console.error("Token not found in sessionStorage");
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }, []);
 
   const handleUserProfile = () => {
-    router.push(`/users/profile/${userId}`); // Redirect to user profile page with userId
+    // Use the userId from token (if available)
+    if (userIdFromToken) {
+      router.push(`/users/profile/${userIdFromToken}`);
+    } else {
+      alert("User ID not available");
+    }
   };
 
   const handleScoreProfile = () => {
-    router.push('/users/scores/leaderboard'); // Redirect to scores page
+    router.push("/users/scores/leaderboard");
   };
 
   const handleAdminUserProfile = () => {
-    router.push('/users/admin'); // Redirect to admin user profile page
+    router.push("/users/admin");
   };
 
   const handleAdmin = () => {
-    router.push('/users/admin'); // Redirect to admin panel
+    router.push("/users/admin");
   };
 
   const handleLogout = () => {
-    router.push('/auth/login'); // Redirect to login page (no token management)
+    sessionStorage.removeItem("token");
+    router.push("/auth/login");
   };
 
   return (
@@ -37,28 +64,18 @@ export default function NavbarHome({ userId }: NavbarHomeProps) {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link href="/">Home</Nav.Link>
-            {/* Direct routing to user profile */}
             <Nav.Link onClick={handleUserProfile}>My Profile</Nav.Link>
-            {/* Dropdown for scores */}
             <NavDropdown title="Scores" id="basic-nav-dropdown">
-              <NavDropdown.Item href="/users/scores/leaderboard">
-                Leaderboard
-              </NavDropdown.Item>
+              <NavDropdown.Item href="/users/scores/leaderboard">Leaderboard</NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item onClick={handleScoreProfile}>
-                My Score Profile
-              </NavDropdown.Item>
+              <NavDropdown.Item onClick={handleScoreProfile}>My Score Profile</NavDropdown.Item>
             </NavDropdown>
-            {/* Dropdown for Admin options */}
-            <NavDropdown title="Admin" id="admin-nav-dropdown">
-              <NavDropdown.Item onClick={handleAdminUserProfile}>
-                Manage User Profile
-              </NavDropdown.Item>
-              <NavDropdown.Item onClick={handleAdmin}>
-                Gestionar Jugadores
-              </NavDropdown.Item>
-            </NavDropdown>
-            {/* Logout link */}
+            {hasAdminRole && (
+              <NavDropdown title="Admin" id="admin-nav-dropdown">
+                <NavDropdown.Item onClick={handleAdminUserProfile}>Manage User Profile</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleAdmin}>Gestionar Jugadores</NavDropdown.Item>
+              </NavDropdown>
+            )}
             <Nav.Link onClick={handleLogout}>Cerrar sesión</Nav.Link>
           </Nav>
         </Navbar.Collapse>

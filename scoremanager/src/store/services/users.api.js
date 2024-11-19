@@ -4,16 +4,21 @@ export const usersApi = createApi({
   reducerPath: "usersAPI",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:3000/api/v1/", // The base URL of your API
+    prepareHeaders: (headers) => {
+      const token = sessionStorage.getItem("token"); // Get the token from sessionStorage
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`); // Use 'Bearer' with the token
+      }
+      return headers;
+    },
   }),
   endpoints: (builder) => ({
     getProfiles: builder.query({
       query: (userId) => `users/${userId}`,
     }),
-
     getUserScores: builder.query({
       query: (userId) => `scores/leaderboard`,
     }),
-
     createRegistration: builder.mutation({
       query: (formDataNewUser) => ({
         url: "users",
@@ -21,7 +26,6 @@ export const usersApi = createApi({
         body: formDataNewUser,
       }),
     }),
-
     userLogin: builder.mutation({
       query: (credentials) => ({
         url: "auth/login",
@@ -29,35 +33,29 @@ export const usersApi = createApi({
         body: credentials,
       }),
     }),
-
     getUsers: builder.query({
-      query: () => 'users', // GET request to fetch all users
+      query: () => "users", // GET request to fetch all users
     }),
-
-    // New mutation to change user status
     changeUserStatus: builder.mutation({
       query: (userId) => ({
-        url: `users/${userId}`, // Assuming this is your API endpoint
-        method: 'PATCH',
+        url: `users/${userId}`,
+        method: "PATCH",
       }),
     }),
-
-    // New mutation to delete a user
     deleteUser: builder.mutation({
       query: (userId) => ({
         url: `users/${userId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
     }),
   }),
 });
 
-// Export hooks for usage in functional components
 export const {
   useGetProfilesQuery,
   useCreateRegistrationMutation,
   useUserLoginMutation,
   useGetUsersQuery,
-  useChangeUserStatusMutation, // Export the mutation hook for changing user status
-  useDeleteUserMutation, // Export the mutation hook for deleting users
+  useChangeUserStatusMutation,
+  useDeleteUserMutation,
 } = usersApi;

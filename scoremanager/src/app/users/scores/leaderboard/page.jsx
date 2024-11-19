@@ -1,8 +1,9 @@
 "use client"
 
 import React from 'react';
-import { useGetLeaderboardQuery } from "scoremanager/store/services/scores.api"; 
+import { useGetLeaderboardQuery } from "../../../../store/services/scores.api"
 import { Table, Spinner, Alert } from 'react-bootstrap'; // Importing required components from react-bootstrap
+import NavbarHome from "../../../../components/shared/navbar-home/page";
 
 const ScorePage = () => {
   // Fetch leaderboard scores
@@ -27,7 +28,9 @@ const ScorePage = () => {
   }
 
   return (
+    
     <div>
+      <NavbarHome/> {/* Pass userId as a prop */}
       <h1>Leaderboard</h1>
       <Table striped bordered hover responsive>
         <thead>
